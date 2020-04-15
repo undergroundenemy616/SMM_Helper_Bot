@@ -12,14 +12,30 @@
 ### Установка и настройка бота:
 Для начала вам нужен сам бот в телеграме, а точнее token бота. Если у вас его нет - [вам сюда](https://core.telegram.org/bots).
 
-Если у вас есть token бота, тогда перемещайтесь на [этот сайт](https://vkhost.github.io). Кликните по приложению Kate Mobile и по инструкции получите access_token.
+Если у вас есть token бота, тогда перемещайтесь на [этот сайт](https://vkhost.github.io) для получения токена ВК. Кликните по приложению Kate Mobile и по инструкции получите access_token.
 
 У вас есть 2 токена? хорошо, скачивайте бота:
 
-Загрузите зависимости - pip3 install -r requirements.txt или же (если вдруг не сработало): python -m pip install -r requirements.txt
-
-Почти готово! Далее откройте скрытый файл .gitignore и измените 2 строчки конфигурации:
- * TELEGRAM_TOKEN="Ваш токен"
- * VK_TOKEN="Ваш токен"
+Склонируйте репозиторий:
+```
+git clone https://github.com/undergroundenemy616/SMM_Helper_Bot.git
+```
+Перейдите в него:
+```
+cd SMM_Helper_Bot/
+```
+Загрузите зависимости:
+```
+pip3 install -r requirements.txt
+```
+или же (если вдруг не сработало): 
+```
+python -m pip install -r requirements.txt
+```
+Почти готово! Далее откройте скрытый файл .env и измените 2 строчки конфигурации:
+```
+  TELEGRAM_TOKEN="Ваш токен"
+  VK_TOKEN="Ваш токен"
+```
 
 Бот готов, запускайте файл "helper.py"
