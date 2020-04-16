@@ -85,6 +85,8 @@ def start_post_handler(bot: Bot, update: Update, user_data: dict):
     user_data['site'] = vk_name
     user_data['vk_groups'] = []
     user_data['ok_groups'] = []
+    user_data['vk_tmp'] = []
+    user_data['ok_tmp'] = []
     user_data['photos'] = [[], 0]
     user_data['text'] = ''
     user_data['flag'] = ''
@@ -138,7 +140,8 @@ def post_make_post_ok_handler(bot: Bot, update: Update, user_data: dict):
             text='Я не понимаю, введи группы с клаиватуры',
         )
         return ConversationHandler.entry_points
-    else:
+    elif update.message.text not in user_data['ok_tmp']:
+        user_data['ok_tmp'].append(update.message.text)
         id = ok_groups[update.message.text]
         user_data['ok_groups'].append(id)
         return ConversationHandler.entry_points
@@ -202,7 +205,8 @@ def post_make_post_vk_handler(bot: Bot, update: Update, user_data: dict):
             text='Я не понимаю, введи группы с клаиватуры',
         )
         return ConversationHandler.entry_points
-    else:
+    elif update.message.text not in user_data['vk_tmp']:
+        user_data['vk_tmp'].append(update.message.text)
         id = vk_groups[update.message.text]
         user_data['vk_groups'].append(id)
         return ConversationHandler.entry_points
