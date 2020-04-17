@@ -195,7 +195,7 @@ def final_post_vk_handler(bot: Bot, update: Update, user_data: dict):
     text = user_data['text']
     user_data['flag'] = update.message.text
     if user_data['vk_groups']:
-        if user_data['flag'] == 'Без фото':
+        if user_data['flag'] == NO_PHOTO:
             for group_id in user_data['vk_groups']:
                 try:
                     vk.wall.post(owner_id=-group_id, message=text)
@@ -269,7 +269,7 @@ def final_post_vk_handler(bot: Bot, update: Update, user_data: dict):
 def final_post_to_ok_handler(bot: Bot, update: Update, user_data: dict):
     text = user_data['text']
     if update.message.text == 'Да':
-        if user_data['flag'] == 'Без фото':
+        if user_data['flag'] == NO_PHOTO:
             x = {
                 "media": [
                     {
