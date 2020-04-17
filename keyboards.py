@@ -36,7 +36,7 @@ CHOOSE_PHOTO_KEYBOARD = ReplyKeyboardMarkup(
 ACCEPT_OR_CANCEL_KEYBOARD = ReplyKeyboardMarkup(
             keyboard=[
                 [
-                    KeyboardButton(text=OK), KeyboardButton(text=CANCEL),
+                    KeyboardButton(text=YES), KeyboardButton(text=CANCEL),
                 ],
             ],
             resize_keyboard=True
