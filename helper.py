@@ -3,16 +3,15 @@ import json
 import os
 import time
 
+import odnoklassniki
 import requests
+import vk_api
+from dotenv import load_dotenv
 from telegram import (Bot, KeyboardButton, ReplyKeyboardMarkup,
                       ReplyKeyboardRemove, Update)
 from telegram.ext import (CommandHandler, ConversationHandler, Filters,
                           MessageHandler, Updater)
 
-
-import odnoklassniki
-import vk_api
-from dotenv import load_dotenv
 from keyboards import *
 from texts import *
 
