@@ -466,7 +466,7 @@ def delete_groups_handler(bot: Bot, update: Update):
             get_delete_interface(vk_groups, update)
         return "vk_delete"
     elif update.message.text == OK_NAME:
-        if not list(vk_groups.keys()):
+        if not list(ok_groups.keys()):
             update.message.reply_text(
                 text=f'У тебя нет рабочих групп в {OK_NAME}',
                 reply_markup=ReplyKeyboardRemove(),
