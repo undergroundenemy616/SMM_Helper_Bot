@@ -13,11 +13,10 @@ from telegram.ext import (CommandHandler, ConversationHandler, Filters,
 import odnoklassniki
 import vk_api
 from dotenv import load_dotenv
+from keyboards import *
+from texts import *
 
 load_dotenv()
-
-vk_name = 'ВКонтакте'
-ok_name = "Одноклассники"
 vk_groups = {}
 ok_groups = {}
 
@@ -43,26 +42,6 @@ def send_image_to_server_ok(image):
     token = cond[0]['token']
     return token
 
-
-def make_keyboard(groups):
-    keyb = []
-    i = 0
-    while i <= len(groups):
-        tmp = []
-        j = i
-        if len(groups) - i < 3:
-            while j < len(groups):
-                tmp.append(KeyboardButton(text=groups[j]))
-                j = j + 1
-        else:
-            while j < i + 3:
-                tmp.append(KeyboardButton(text=groups[j]))
-                j = j + 1
-        keyb.append(tmp)
-        i = i + 3
-    return keyb
-
-
 def start_conv_handler(bot: Bot, update: Update):
     user = update.effective_user
     name = user.first_name if user else 'аноним'
@@ -75,14 +54,14 @@ def start_conv_handler(bot: Bot, update: Update):
 
 def help_handler(bot: Bot, update: Update):
     update.message.reply_text(
-        text=(f'Я умею одновременно публиковать посты в группы социальных сетей, а конкретно в {vk_name} и '
-              f'{ok_name}.\n\n1. Введи /add, чтобы я запомнил интересующие тебя группы. \n\n2. Введи /post, чтобы '
+        text=(f'Я умею одновременно публиковать посты в группы социальных сетей, а конкретно в {VK_NAME} и '
+              f'{OK_NAME}.\n\n1. Введи /add, чтобы я запомнил интересующие тебя группы. \n\n2. Введи /post, чтобы '
               f'я сделал посты в твоих сохраненных группах.\n\n3. Введи /delete, чтобы я забыл ненужные тебе группы.')
     )
 
 
 def start_post_handler(bot: Bot, update: Update, user_data: dict):
-    user_data['site'] = vk_name
+    user_data['site'] = VK_NAME
     user_data['vk_groups'] = []
     user_data['ok_groups'] = []
     user_data['vk_tmp'] = []
@@ -98,38 +77,38 @@ def start_post_handler(bot: Bot, update: Update, user_data: dict):
         return ConversationHandler.END
     if list(vk_groups.keys()):
         keyboard = make_keyboard(list(vk_groups.keys()))
-        keyboard.append([KeyboardButton(text='Готово ✅'), KeyboardButton(text='Отмена ❌')])
+        keyboard.append(YES_OR_NO_KEYBOARD)
         reply_markup = ReplyKeyboardMarkup(
             keyboard=keyboard,
             resize_keyboard=True
         )
         update.message.reply_text(
-            text=f"Выбери группы {vk_name}, куда нужно сделать пост. Когда закончишь нажми Готово ✅",
+            text=f"Выбери группы {VK_NAME}, куда нужно сделать пост. Когда закончишь нажми Готово ✅",
             reply_markup=reply_markup,
         )
         return "post_to_vk"
     elif list(ok_groups.keys()):
         keyboard = make_keyboard(list(ok_groups.keys()))
-        keyboard.append([KeyboardButton(text='Готово ✅'), KeyboardButton(text='Отмена ❌')])
+        keyboard.append(YES_OR_NO_KEYBOARD)
         reply_markup = ReplyKeyboardMarkup(
             keyboard=keyboard,
             resize_keyboard=True
         )
         update.message.reply_text(
-            text=f"Выбери группы {ok_name}, куда нужно сделать пост. Когда закончишь нажми Готово ✅",
+            text=f"Выбери группы {OK_NAME}, куда нужно сделать пост. Когда закончишь нажми Готово ✅",
             reply_markup=reply_markup,
         )
         return "post_to_ok"
 
 
 def post_make_post_ok_handler(bot: Bot, update: Update, user_data: dict):
-    if update.message.text == 'Готово ✅':
+    if update.message.text == OK:
         update.message.reply_text(
             text=f'Напиши текст поста для публикации',
             reply_markup=ReplyKeyboardRemove(),
         )
         return "attachments"
-    elif update.message.text == 'Отмена ❌':
+    elif update.message.text == CANCEL:
         update.message.reply_text(
             text='Ок',
             reply_markup=ReplyKeyboardRemove(),
@@ -148,7 +127,7 @@ def post_make_post_ok_handler(bot: Bot, update: Update, user_data: dict):
 
 
 def attachments_handler(bot: Bot, update: Update, user_data: dict):
-    if update.message.text == 'Отмена ❌':
+    if update.message.text == CANCEL:
         update.message.reply_text(
             text='Ок',
             reply_markup=ReplyKeyboardRemove(),
@@ -156,17 +135,7 @@ def attachments_handler(bot: Bot, update: Update, user_data: dict):
         return ConversationHandler.END
     else:
         user_data['text'] = update.message.text
-        reply_markup = ReplyKeyboardMarkup(
-            keyboard=[
-                [
-                    KeyboardButton(text='Без фото'),
-                ],
-                [
-                    KeyboardButton(text='Готово ✅'), KeyboardButton(text='Отмена ❌'),
-                ],
-            ],
-            resize_keyboard=True
-        )
+        reply_markup = CHOOSE_PHOTO_KEYBOARD
         update.message.reply_text(
             text='Приложи фотографию / фотографии к посту',
             reply_markup=reply_markup
@@ -175,16 +144,16 @@ def attachments_handler(bot: Bot, update: Update, user_data: dict):
 
 
 def post_make_post_vk_handler(bot: Bot, update: Update, user_data: dict):
-    if update.message.text == 'Готово ✅':
+    if update.message.text == OK:
         if list(ok_groups.keys()):
             keyboard = make_keyboard(list(ok_groups.keys()))
-            keyboard.append([KeyboardButton(text='Готово ✅'), KeyboardButton(text='Отмена ❌')])
+            keyboard.append(YES_OR_NO_KEYBOARD)
             reply_markup = ReplyKeyboardMarkup(
                 keyboard=keyboard,
                 resize_keyboard=True
             )
             update.message.reply_text(
-                text=f"Выбери группы {ok_name}, куда нужно сделать пост. Когда закончишь нажми Готово",
+                text=f"Выбери группы {OK_NAME}, куда нужно сделать пост. Когда закончишь нажми Готово",
                 reply_markup=reply_markup,
             )
             return "post_to_ok"
@@ -194,7 +163,7 @@ def post_make_post_vk_handler(bot: Bot, update: Update, user_data: dict):
                 reply_markup=ReplyKeyboardRemove(),
             )
             return "attachments"
-    elif update.message.text == 'Отмена ❌':
+    elif update.message.text == CANCEL:
         update.message.reply_text(
             text='Ок',
             reply_markup=ReplyKeyboardRemove(),
@@ -241,13 +210,13 @@ def final_post_vk_handler(bot: Bot, update: Update, user_data: dict):
                     reply_markup=ReplyKeyboardRemove(),
                     text=f"Пост в группу с ID:{group_id} успешно опубликован",
                 )
-        elif user_data['flag'] == 'Отмена ❌':
+        elif user_data['flag'] == CANCEL:
             update.message.reply_text(
                 text='Ок',
                 reply_markup=ReplyKeyboardRemove(),
             )
             return ConversationHandler.END
-        elif user_data['flag'] == "Готово ✅":
+        elif user_data['flag'] == OK:
             for group_id in user_data['vk_groups']:
                 update.message.reply_text(
                     text="Загрузка поста, ожидайте...",
@@ -280,27 +249,20 @@ def final_post_vk_handler(bot: Bot, update: Update, user_data: dict):
     else:
         update.message.reply_text(
             reply_markup=ReplyKeyboardRemove(),
-            text=f"Группы для добавления постов в {vk_name} не были выбраны"
+            text=f"Группы для добавления постов в {VK_NAME} не были выбраны"
         )
     if user_data['ok_groups']:
-        reply_markup = ReplyKeyboardMarkup(
-            keyboard=[
-                [
-                    KeyboardButton(text='Да'), KeyboardButton(text='Отмена ❌'),
-                ],
-            ],
-            resize_keyboard=True
-        )
+        reply_markup = ACCEPT_OR_CANCEL_KEYBOARD
         time.sleep(2)
         update.message.reply_text(
-            text=f'С {vk_name} разобрались, в {ok_name} выкладываем?',
+            text=f'С {VK_NAME} разобрались, в {OK_NAME} выкладываем?',
             reply_markup=reply_markup
         )
         return "final_post_to_ok"
     else:
         update.message.reply_text(
             reply_markup=ReplyKeyboardRemove(),
-            text=f"Группы для добавления постов в {ok_name} не были выбраны"
+            text=f"Группы для добавления постов в {OK_NAME} не были выбраны"
         )
         return ConversationHandler.END
 
@@ -331,7 +293,7 @@ def final_post_to_ok_handler(bot: Bot, update: Update, user_data: dict):
                     text=f"Пост в группу ID:{group_id} успешно опубликован",
                     reply_markup=ReplyKeyboardRemove(),
                 )
-        elif user_data['flag'] == "Готово ✅":
+        elif user_data['flag'] == OK:
             for group_id in user_data['ok_groups']:
                 update.message.reply_text(
                     text="Загрузка поста, ожидание...",
@@ -370,7 +332,7 @@ def final_post_to_ok_handler(bot: Bot, update: Update, user_data: dict):
                     reply_markup=ReplyKeyboardRemove(),
                     text=f"Пост в группу ID:{group_id} успешно опубликован",
                 )
-    elif update.message.text == 'Отмена ❌':
+    elif update.message.text == CANCEL:
         update.message.reply_text(
             text='Ок',
             reply_markup=ReplyKeyboardRemove(),
@@ -385,18 +347,7 @@ def final_post_to_ok_handler(bot: Bot, update: Update, user_data: dict):
 
 
 def add_start_handler(bot: Bot, update: Update):
-    reply_markup = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text=vk_name), KeyboardButton(text=ok_name),
-            ],
-
-            [
-                KeyboardButton(text='Отмена ❌'),
-            ],
-        ],
-        resize_keyboard=True
-    )
+    reply_markup = CHOOSE_GROUP_KEYBOARD
     update.message.reply_text(
         "Из какой соцсети мне сохранить группу?",
         reply_markup=reply_markup,
@@ -405,15 +356,10 @@ def add_start_handler(bot: Bot, update: Update):
 
 
 def add_choose_site_handler(bot: Bot, update: Update, user_data: dict):
-    if update.message.text == vk_name or update.message.text == ok_name:
+    if update.message.text == VK_NAME or update.message.text == OK_NAME:
         user_data['site'] = update.message.text
         reply_markup = ReplyKeyboardMarkup(
-            keyboard=[
-
-                [
-                    KeyboardButton(text='Готово ✅'), KeyboardButton(text='Отмена ❌'),
-                ],
-            ],
+            keyboard=[YES_OR_NO_KEYBOARD],
             resize_keyboard=True
         )
         update.message.reply_text(
@@ -421,7 +367,7 @@ def add_choose_site_handler(bot: Bot, update: Update, user_data: dict):
             reply_markup=reply_markup
         )
         return "get_group"
-    elif update.message.text == 'Отмена ❌':
+    elif update.message.text == CANCEL:
         update.message.reply_text(
             text="Ок",
             reply_markup=ReplyKeyboardRemove(),
@@ -457,13 +403,13 @@ def add_group(site_groups, group_name, group_id, update):
 
 
 def add_get_group_handler(bot: Bot, update: Update, user_data: dict):
-    if update.message.text == 'Отмена ❌':
+    if update.message.text == CANCEL:
         update.message.reply_text(
             text="Ок",
             reply_markup=ReplyKeyboardRemove(),
         )
         return ConversationHandler.END
-    elif update.message.text == 'Готово ✅':
+    elif update.message.text == OK:
         update.message.reply_text(
             text="Сохранил",
             reply_markup=ReplyKeyboardRemove(),
@@ -471,10 +417,10 @@ def add_get_group_handler(bot: Bot, update: Update, user_data: dict):
         return ConversationHandler.END
     id = update.message.text
     try:
-        if user_data['site'] == vk_name:
+        if user_data['site'] == VK_NAME:
             group = vk.groups.getById(group_id=id)
             add_group(vk_groups, group[0]['name'], group[0]['id'], update)
-        elif user_data['site'] == ok_name:
+        elif user_data['site'] == OK_NAME:
             group = {}
             group['name'] = ok.group.getInfo(uids=id, fields='NAME')[0]['name']
             group['id'] = ok.group.getInfo(uids=id, fields='UID')[0]['uid']
@@ -488,17 +434,7 @@ def add_get_group_handler(bot: Bot, update: Update, user_data: dict):
 
 
 def delete_start_handler(bot: Bot, update: Update):
-    reply_markup = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text=vk_name), KeyboardButton(text=ok_name),
-            ],
-            [
-                KeyboardButton(text='Отмена ❌'),
-            ],
-        ],
-        resize_keyboard=True
-    )
+    reply_markup = CHOOSE_GROUP_KEYBOARD
     update.message.reply_text(
         text="Из какой соцсети мне удалить группу?",
         reply_markup=reply_markup,
@@ -508,7 +444,7 @@ def delete_start_handler(bot: Bot, update: Update):
 
 def get_delete_interface(groups, update):
     keyboard = make_keyboard(list(groups.keys()))
-    keyboard.append([KeyboardButton(text='Готово ✅'), KeyboardButton(text='Отмена ❌')])
+    keyboard.append(YES_OR_NO_KEYBOARD)
     reply_markup = ReplyKeyboardMarkup(
         keyboard=keyboard,
         resize_keyboard=True
@@ -520,27 +456,27 @@ def get_delete_interface(groups, update):
 
 
 def delete_groups_handler(bot: Bot, update: Update):
-    if update.message.text == vk_name:
+    if update.message.text == VK_NAME:
         if not list(vk_groups.keys()):
             update.message.reply_text(
-                text=f'У тебя нет рабочих групп в {vk_name}',
+                text=f'У тебя нет рабочих групп в {VK_NAME}',
                 reply_markup=ReplyKeyboardRemove(),
             )
             return ConversationHandler.END
         else:
             get_delete_interface(vk_groups, update)
         return "vk_delete"
-    elif update.message.text == ok_name:
+    elif update.message.text == OK_NAME:
         if not list(vk_groups.keys()):
             update.message.reply_text(
-                text=f'У тебя нет рабочих групп в {ok_name}',
+                text=f'У тебя нет рабочих групп в {OK_NAME}',
                 reply_markup=ReplyKeyboardRemove(),
             )
             return ConversationHandler.END
         else:
             get_delete_interface(ok_groups, update)
         return "fb_delete"
-    elif update.message.text == 'Отмена ❌':
+    elif update.message.text == CANCEL:
         update.message.reply_text(
             text='Ок',
             reply_markup=ReplyKeyboardRemove(),
@@ -554,7 +490,7 @@ def delete_groups_handler(bot: Bot, update: Update):
 
 
 def tmpl_group_delete(groups, update):
-    if update.message.text == "Готово ✅":
+    if update.message.text == OK:
         update.message.reply_text(
             text='Я запомнил изменения',
             reply_markup=ReplyKeyboardRemove(),
@@ -570,7 +506,7 @@ def tmpl_group_delete(groups, update):
         group_name = update.message.text
         d = groups.pop(group_name)
         keyboard = make_keyboard(list(groups.keys()))
-        keyboard.append([KeyboardButton(text='Готово ✅'), KeyboardButton(text='Отмена ❌')])
+        keyboard.append(YES_OR_NO_KEYBOARD)
         reply_markup = ReplyKeyboardMarkup(
             keyboard=keyboard,
             resize_keyboard=True
@@ -580,7 +516,7 @@ def tmpl_group_delete(groups, update):
             reply_markup=reply_markup,
         )
         return ConversationHandler.entry_points
-    elif update.message.text == 'Отмена ❌':
+    elif update.message.text == CANCEL:
         update.message.reply_text(
             text='Ок',
             reply_markup=ReplyKeyboardRemove(),
